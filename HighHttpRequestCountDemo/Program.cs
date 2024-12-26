@@ -42,18 +42,17 @@ internal class Program
 
     private static bool WaitForWebApiReady()
     {
-        HttpRequestMessage headMsg = new HttpRequestMessage(HttpMethod.Head, targetBaseUrl);
-        HttpResponseMessage responseMsg = null!;
+        using HttpRequestMessage headMsg = new HttpRequestMessage(HttpMethod.Head, targetBaseUrl);
         int attemptCnt = 0;
 
         while (++attemptCnt <= 3)
         {
             try
             {
-                responseMsg = httpClient.Send(headMsg);
+                using HttpResponseMessage responseMsg = httpClient.Send(headMsg);
                 if (responseMsg.StatusCode == HttpStatusCode.OK)
                 {
-                    break;
+                    return true;
                 }
             }
             catch
@@ -62,7 +61,7 @@ internal class Program
             }
         }
 
-        return responseMsg != null && responseMsg.StatusCode == HttpStatusCode.OK;
+        return false;
     }
 
     private static void PerformDemo(int howManyUsers = 10_000)

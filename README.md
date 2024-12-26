@@ -6,7 +6,7 @@ for sandboxing ideas related to sending http requests.
 The client it'self starts the web api and then proceeds to 
 demonstrate different possible strategies for handling the need to send 
 large numbers of HTTP requests to an API without the angst of port 
-exhaustion or other issues.
+exhaustion, DNS changes or other issues.
 ###
 Additional demos are simple to add in the PerformDemo method.
 Currently there are two http strategies, a SemaphoreSlim and TPL, with
