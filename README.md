@@ -13,6 +13,6 @@ Currently there are two http strategies, a SemaphoreSlim and TPL, with
 a third based on a queueing to possibly come shortly.
 ### A Note
 This solution contains code which is not intended to be polished for a 
-production environment, but rather, to provide the basic environment 
+production environment, but rather to provide the basic environment 
 for creating proof of concepts or testing ideas.
 
