@@ -20,12 +20,17 @@ internal class ActionQueue<T>(Action<T> action, int concurrencyLimit = 4)
             return;
         }
 
+        int dequeuTries = 0;
         while (!_queue.IsEmpty)
         {
             _isProcessing = true;
 
             if (!_queue.TryDequeue(out T? item))
             {
+                if (++dequeuTries == 3)
+                {
+                    throw new Exception("Exeeded dequeue retries.");
+                }
                 continue;
             }
 
