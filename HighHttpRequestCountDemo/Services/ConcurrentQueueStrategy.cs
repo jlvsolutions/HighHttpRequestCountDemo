@@ -6,7 +6,8 @@ namespace HighHttpRequestCountDemo.Services;
 internal class ConcurrentQueueStrategy(HttpClient client, string baseUrl, int concurrencyLimit = 10) : IDemoStrategy
 {
     public string Name => "ConcurrentQueue Strategy";
-    public string Description => "Any requests Enqueued will be dequeued and sent using circuit breaker strategy and concurrency limiting.";
+    public string Description => "Any requests Enqueued will be dequeued and sent using circuit breaker strategy and concurrency limiting.\n" +
+                                 "This strategy has the potential for very large volume.";
     private readonly ConcurrentBag<User> _responses = [];
     private readonly SemaphoreSlim Completed = new SemaphoreSlim(1);
     private int _numberOfRequests;
