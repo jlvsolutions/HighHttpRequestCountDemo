@@ -14,4 +14,7 @@ Currently there are three http strategies, a SemaphoreSlim, TPL, and queueing.
 This solution contains code which is not intended to be polished as in a 
 production environment, but rather to provide the basic environment 
 for creating proof of concepts or testing ideas.
+### A Note To Run
+After cloning or opening from GitHub with VS, be sure to set the console project as the startup project.
+It launches the Web API for you.
 
