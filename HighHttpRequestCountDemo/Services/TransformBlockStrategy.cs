@@ -3,10 +3,9 @@ using System.Threading.Tasks.Dataflow;
 
 namespace HighHttpRequestCountDemo.Services;
 
-internal class TransformBlockStrategy(HttpClient client, string baseUrl) : IDemoStrategy
+internal class TransformBlockStrategy(HttpClient client, string baseUrl, int concurrencyLimit = 10) : IDemoStrategy
 {
     public string Name => "TransformBlock Strategy";
-
     public string Description => @"Uses the TPL to act like a queue as a form of a circuit breaker strategy in order to limit concurrent http requests.";
 
     public IReadOnlyList<User> Execute(int numberOfRequests)
@@ -15,7 +14,7 @@ internal class TransformBlockStrategy(HttpClient client, string baseUrl) : IDemo
        
         TransformBlock<string, User> transform = new TransformBlock<string, User>(
             client.GetUser,
-            new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = 10 } );
+            new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = concurrencyLimit } );
 
         BufferBlock<User> buffer = new BufferBlock<User>();
         

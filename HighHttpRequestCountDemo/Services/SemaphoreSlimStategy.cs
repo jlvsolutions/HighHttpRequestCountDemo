@@ -3,16 +3,15 @@ using System.Collections.Concurrent;
 
 namespace HighHttpRequestCountDemo.Services;
 
-internal class SemaphoreSlimStategy(HttpClient client, string baseUrl) : IDemoStrategy
+internal class SemaphoreSlimStategy(HttpClient client, string baseUrl, int concurrencyLimit = 10) : IDemoStrategy
 {
     public string Name => "SemaphoreSlim Strategy";
-
     public string Description => "Uses a SemaphoreSlim to implement a circuit breaker strategy in order to limit concurrent http requests.";
 
     public IReadOnlyList<User> Execute(int numberOfRequests)
     {
         List<int> userIds = Enumerable.Range(1, numberOfRequests).ToList();
-        SemaphoreSlim semaphoreSlim = new SemaphoreSlim(initialCount: 10, maxCount: 10);
+        SemaphoreSlim semaphoreSlim = new SemaphoreSlim(initialCount: concurrencyLimit, maxCount: concurrencyLimit);
         ConcurrentBag<User> responses = new ConcurrentBag<User>();
 
         IEnumerable<Task> tasks = userIds.Select(async userId =>
@@ -23,7 +22,7 @@ internal class SemaphoreSlimStategy(HttpClient client, string baseUrl) : IDemoSt
             {
                 responses.Add(await client.GetUser($"{baseUrl}/user/{userId}"));
 
-                if (userId % (int)(userIds.Count * .05) == 0)
+                if (userIds.Count > 2 && (userId % (int)(userIds.Count * .05) == 0))
                 {
                     Console.Write($"\r{userId}"); // Give a sense of progress for UX.  Not exactly accurate but enough for demo.
                 }
