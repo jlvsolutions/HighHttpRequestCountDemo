@@ -24,7 +24,10 @@ internal class ActionQueue<T>(Action<T> action, int concurrencyLimit = 4)
         {
             _isProcessing = true;
 
-            _ = _queue.TryDequeue(out T? item); // TODO:  Wrap with error handling.
+            if (!_queue.TryDequeue(out T? item))
+            {
+                continue;
+            }
 
             Task.Run(async () =>
             {
@@ -32,7 +35,7 @@ internal class ActionQueue<T>(Action<T> action, int concurrencyLimit = 4)
                 {
                     await _semaphore.WaitAsync();
 
-                    item = item ?? default;
+                    item ??= default;
                     _action(item!);
                 }
                 catch (Exception ex)
