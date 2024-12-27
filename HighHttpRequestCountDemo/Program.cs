@@ -158,7 +158,7 @@ internal class Program
 
                 int failedCount = result.Where(u => u.Year == -1).Count();
 
-                WriteLine($"\n{result.Count:N0} Responses received.  Failed: {failedCount}, in {stopwatch.Elapsed:m\\:ss\\.ff}.", ConsoleColor.White);
+                WriteLine($"\n{result.Count:N0} Responses received, {failedCount} Failed, in {stopwatch.Elapsed:m\\:ss\\.ff}.", ConsoleColor.White);
             });
         }
         catch (Exception ex)

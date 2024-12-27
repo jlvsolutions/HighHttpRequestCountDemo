@@ -1,5 +1,4 @@
 ﻿using HighHttpRequestCountDemo.API.Domain;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
 
 namespace HighHttpRequestCountDemo.Services;
@@ -9,7 +8,7 @@ internal static class HttpExtensions
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     /// <summary>
-    /// Guarantees the returns of an <see cref="User"/> object regardless of errors.  If an error occurrs
+    /// Guarantees the return of an <see cref="User"/> object regardless of errors.  If an error occurrs
     /// the returned User object will have the Year set to -1
     /// </summary>
     /// <returns>An User instance.  Year will be set to -1 if an error occurred.</returns>

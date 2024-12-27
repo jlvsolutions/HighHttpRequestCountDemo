@@ -9,48 +9,44 @@ internal class ConcurrentQueueStrategy(HttpClient client, string baseUrl, int co
     public string Description => "Any requests Enqueued will be dequeued and sent using circuit breaker strategy and concurrency limiting.\n" +
                                  "This strategy has the potential for very large volume.";
     private readonly ConcurrentBag<User> _responses = [];
-    private readonly SemaphoreSlim Completed = new SemaphoreSlim(1);
+    private readonly SemaphoreSlim _completed = new SemaphoreSlim(0);
     private int _numberOfRequests;
 
     public IReadOnlyList<User> Execute(int numberOfRequests)
     {
+        _numberOfRequests = numberOfRequests;
         List<int> userIds = Enumerable.Range(1, numberOfRequests).ToList();
-        ActionQueue<int> queue = new(ProcessEnqueuedItem, concurrencyLimit);
+        ActionQueue<int> queue = new ActionQueue<int>(ProcessEnqueuedItem, concurrencyLimit);
 
         int firstBurstCount = (int)(userIds.Count * 0.05);
         int SecondBurstCount = numberOfRequests - firstBurstCount;
-        _numberOfRequests = numberOfRequests;
-
-        Completed.Wait();
 
         Console.WriteLine($"Submitting {numberOfRequests:N0} requests...");
-        for ( int i = 0; i < numberOfRequests; i++)
+
+        //for ( int i = 0; i < numberOfRequests; i++)
+        //{
+        //    queue.Submit(userIds[i]);
+        //}
+
+        int i = 0;
+        Console.WriteLine($"Submitting First batch of {firstBurstCount} requests...");
+        for (; i < firstBurstCount; i++)
         {
             queue.Submit(userIds[i]);
         }
 
-        //int i = 0;
-        //Console.WriteLine($"Submitting First batch of {firstBurstCount} requests...");
-        //for (; i < firstBurstCount; i++)
-        //{
-        //    queue.Submit(userIds[i]);
-        //}
+        Console.WriteLine("Delaying for caller's other simulated busy work...");
+        Thread.Sleep(2000);
 
-        //Console.WriteLine("Delaying for simulated other busy work...");
-        //for (int j = 0; j < 500_000_000; j++)
-        //{
-        //    int four = 2 + 2;
-        //}
-
-        //Console.WriteLine($"\nSubmitting Second batch of {SecondBurstCount} requests...");
-        //for (i = firstBurstCount; i < firstBurstCount + SecondBurstCount; i++)
-        //{
-        //    queue.Submit(userIds[i]);
-        //}
+        Console.WriteLine($"\nSubmitting Second batch of {SecondBurstCount} requests...");
+        for (i = firstBurstCount; i < firstBurstCount + SecondBurstCount; i++)
+        {
+            queue.Submit(userIds[i]);
+        }
 
         Console.WriteLine($"\nCompleted submitting all {userIds.Count:N0} requests.");
 
-        Completed.Wait();
+        _completed.Wait();
 
         return _responses.ToList().AsReadOnly();
     }
@@ -59,14 +55,14 @@ internal class ConcurrentQueueStrategy(HttpClient client, string baseUrl, int co
     {
         _responses.Add(await client.GetUser($"{baseUrl}/user/{userId}"));
 
-        if (_responses.Count % 100 == 0)
+        if (_responses.Count % 50 == 0)
         {
             Console.Write($"\rResponses: {_responses.Count:N0}");
         }
 
         if (_responses.Count == _numberOfRequests)
         {
-            Completed.Release();
+            _completed.Release();
         }
     }
 }

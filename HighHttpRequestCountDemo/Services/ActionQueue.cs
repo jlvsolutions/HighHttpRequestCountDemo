@@ -7,14 +7,12 @@ namespace HighHttpRequestCountDemo.Services;
 internal class ActionQueue<T>(Action<T> action, int concurrencyLimit = 4)
 {
     private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(concurrencyLimit, concurrencyLimit);
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(concurrencyLimit);
     private readonly Action<T> _action = action;
     private bool _isProcessing = false;
 
     private void StartProcessing()
     {
-        //Console.WriteLine($"StartProcessing() called.  {_isProcessing}, SubmittedCount: {submittedCnt}");
-
         if (_isProcessing)
         {
             return;
@@ -33,6 +31,7 @@ internal class ActionQueue<T>(Action<T> action, int concurrencyLimit = 4)
                 }
                 continue;
             }
+            dequeuTries = 0;
 
             Task.Run(async () =>
             {
@@ -40,8 +39,7 @@ internal class ActionQueue<T>(Action<T> action, int concurrencyLimit = 4)
                 {
                     await _semaphore.WaitAsync();
 
-                    item ??= default;
-                    _action(item!);
+                    _action(item);
                 }
                 catch (Exception ex)
                 {
@@ -54,17 +52,12 @@ internal class ActionQueue<T>(Action<T> action, int concurrencyLimit = 4)
             });
         }
         _isProcessing = false;
-
-        //Console.WriteLine("Exiting StartProcessing().");
     }
 
-    int submittedCnt = 0;
     /// <summary>Queues an item for the action specified in the constructor. </summary>
     public void Submit(T item)
     {
         _queue.Enqueue(item);
-
-        submittedCnt++;
 
         // Ensure that processing is taking place
         StartProcessing();
