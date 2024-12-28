@@ -9,7 +9,8 @@ large numbers of HTTP requests to an API without the angst of port
 exhaustion, DNS changes or other issues.
 ###
 Additional demos/strategies are simple to add to the client.
-Currently there are three http strategies, a SemaphoreSlim, TPL, and queueing. 
+Currently there are four http strategies, a SemaphoreSlim, TPL, ConcurrentQueue, 
+and BlockingCollecion. 
 ### A Note
 This solution contains code which is not intended to be polished as in a 
 production environment, but rather to provide the basic environment 
