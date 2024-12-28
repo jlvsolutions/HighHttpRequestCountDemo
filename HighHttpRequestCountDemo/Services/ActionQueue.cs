@@ -11,7 +11,17 @@ internal class ActionQueue<T>(Action<T> action, int concurrencyLimit = 4)
     private readonly Action<T> _action = action;
     private bool _isProcessing = false;
 
-    private void StartProcessing()
+
+    /// <summary>Queues an item for the action specified in the constructor. </summary>
+    public void Submit(T item)
+    {
+        _queue.Enqueue(item);
+
+        // Ensure that processing is taking place
+        Process();
+    }
+
+    private void Process()
     {
         if (_isProcessing)
         {
@@ -52,14 +62,5 @@ internal class ActionQueue<T>(Action<T> action, int concurrencyLimit = 4)
             });
         }
         _isProcessing = false;
-    }
-
-    /// <summary>Queues an item for the action specified in the constructor. </summary>
-    public void Submit(T item)
-    {
-        _queue.Enqueue(item);
-
-        // Ensure that processing is taking place
-        StartProcessing();
     }
 }

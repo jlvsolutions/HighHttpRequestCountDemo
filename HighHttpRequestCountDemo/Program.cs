@@ -11,7 +11,7 @@ internal class Program
     const string targetSecureBaseUrl = "https://localhost:7560";
     static List<IDemoStrategy> availableStrategies = null!;
 
-    const int NUMBER_OF_REQUESTS_TO_SEND = 10_000;
+    const int NUMBER_OF_REQUESTS_TO_SEND = 1_000;
 
     private static void Main(string[] args)
     {
@@ -25,7 +25,9 @@ internal class Program
 
         availableStrategies = [new SemaphoreSlimStategy(httpClient, targetSecureBaseUrl),
                                new TransformBlockStrategy(httpClient, targetSecureBaseUrl),
-                               new ConcurrentQueueStrategy(httpClient, targetSecureBaseUrl)];
+                               new ConcurrentQueueStrategy(httpClient, targetSecureBaseUrl),
+                               new BlockingCollectionStrategy(httpClient, targetSecureBaseUrl)
+                               ];
 
         StartWebApi();
 
@@ -33,18 +35,22 @@ internal class Program
         {
             WriteLine($"\nWeb API is running.  Swagger also available at {targetSecureBaseUrl}/swagger.", ConsoleColor.Green);
 
-            strategiesToDemo.AddRange( DisplayMenu() );
+            while (true)
+            {
+                strategiesToDemo.AddRange(DisplayMenu());
 
-            PerformDemo(strategiesToDemo, NUMBER_OF_REQUESTS_TO_SEND);
+                if (strategiesToDemo.Count == 0)
+                {
+                    return; // Exit.
+                }
+
+                PerformDemo(strategiesToDemo, NUMBER_OF_REQUESTS_TO_SEND);
+                strategiesToDemo.Clear();
+            }
         }
         else
         {
             WriteLine("Web API did not start.", ConsoleColor.Red);
-        }
-
-        if (strategiesToDemo.Count > 0)
-        {
-            PressKeyToExit();
         }
     }
 
@@ -138,11 +144,6 @@ internal class Program
 
     private static void PerformDemo(List<IDemoStrategy> strategiesToDemo, int numberOfRequests = 1_000)
     {
-        if (strategiesToDemo.Count == 0)
-        {
-            return;
-        }
-
         WriteLine($"Performing {strategiesToDemo.Count} Demo(s) using {numberOfRequests:N0} requests for each...", ConsoleColor.Yellow);
         Stopwatch stopwatch = new Stopwatch();
 
@@ -167,16 +168,10 @@ internal class Program
         }
     }
 
-    private static void PressKeyToExit()
-    {
-        WriteLine("\nPress any key to exit.");
-        Console.ReadKey();
-        Console.WriteLine("\nExiting.");
-    }
-
     public static void WriteLine(string msg, ConsoleColor color = ConsoleColor.Gray)
     {
         Console.ForegroundColor = color;
         Console.WriteLine(msg);
+        Console.ForegroundColor = ConsoleColor.Gray; // Is default.
     }
 }

@@ -17,17 +17,21 @@ internal class ConcurrentQueueStrategy(HttpClient client, string baseUrl, int co
         _numberOfRequests = numberOfRequests;
         List<int> userIds = Enumerable.Range(1, numberOfRequests).ToList();
         ActionQueue<int> queue = new ActionQueue<int>(ProcessEnqueuedItem, concurrencyLimit);
+        _responses.Clear();
 
         int firstBurstCount = (int)(userIds.Count * 0.05);
         int SecondBurstCount = numberOfRequests - firstBurstCount;
 
         Console.WriteLine($"Submitting {numberOfRequests:N0} requests...");
 
+        // All at onece.
         //for ( int i = 0; i < numberOfRequests; i++)
         //{
         //    queue.Submit(userIds[i]);
         //}
 
+
+        // Or, in bursts.
         int i = 0;
         Console.WriteLine($"Submitting First batch of {firstBurstCount} requests...");
         for (; i < firstBurstCount; i++)
@@ -35,7 +39,7 @@ internal class ConcurrentQueueStrategy(HttpClient client, string baseUrl, int co
             queue.Submit(userIds[i]);
         }
 
-        Console.WriteLine("Delaying for caller's other simulated busy work...");
+        Program.WriteLine("Delaying 2 seconds for simulating caller's other busy busy work...", ConsoleColor.White);
         Thread.Sleep(2000);
 
         Console.WriteLine($"\nSubmitting Second batch of {SecondBurstCount} requests...");
@@ -44,7 +48,7 @@ internal class ConcurrentQueueStrategy(HttpClient client, string baseUrl, int co
             queue.Submit(userIds[i]);
         }
 
-        Console.WriteLine($"\nCompleted submitting all {userIds.Count:N0} requests.");
+        Console.WriteLine($"\nCompleted submitting all {numberOfRequests:N0} requests.");
 
         _completed.Wait();
 
