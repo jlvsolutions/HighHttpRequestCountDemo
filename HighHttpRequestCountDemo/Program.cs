@@ -11,7 +11,7 @@ internal class Program
     const string targetSecureBaseUrl = "https://localhost:7560";
     static List<IDemoStrategy> availableStrategies = null!;
 
-    const int NUMBER_OF_REQUESTS_TO_SEND = 10_000;
+    const int NUMBER_OF_REQUESTS_TO_SEND = 5_000;
 
     private static void Main(string[] args)
     {
@@ -37,11 +37,11 @@ internal class Program
 
             while (true)
             {
-                strategiesToDemo.AddRange(DisplayMenu());
+                strategiesToDemo.AddRange( DisplayMenu() );
 
                 if (strategiesToDemo.Count == 0)
                 {
-                    return; // Exit.
+                    return;
                 }
 
                 PerformDemo(strategiesToDemo, NUMBER_OF_REQUESTS_TO_SEND);
@@ -144,14 +144,14 @@ internal class Program
 
     private static void PerformDemo(List<IDemoStrategy> strategiesToDemo, int numberOfRequests = 1_000)
     {
-        WriteLine($"Performing {strategiesToDemo.Count} Demo(s) using {numberOfRequests:N0} requests for each...", ConsoleColor.Yellow);
+        WriteLine($"Performing {strategiesToDemo.Count} Demo(s) using {numberOfRequests:N0} requests...", ConsoleColor.Yellow);
         Stopwatch stopwatch = new Stopwatch();
 
         try
         {
             strategiesToDemo.ForEach(strategy =>
             {
-                WriteLine($"\nExecuting {strategy.Name}:\n{strategy.Description}");
+                WriteLine($"\nExecuting {strategy.Name}:\n{strategy.Description}", ConsoleColor.DarkYellow);
 
                 stopwatch.Restart();
                 IReadOnlyCollection<User> result = strategy.Execute(numberOfRequests);

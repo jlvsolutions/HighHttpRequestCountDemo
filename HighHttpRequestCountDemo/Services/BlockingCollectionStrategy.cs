@@ -7,12 +7,12 @@ internal class BlockingCollectionStrategy(HttpClient client, string baseUrl, int
 {
     public string Name => "BlockingCollection Strategy";
     public string Description => "This strategy leverages BlockingCollection's blocking and bounding functionality\n" +
-                                 "to throttle concurrent http requests.";
+                                 "to throttle concurrent http requests.  Not a favorable approach as the caller \n" +
+                                 "is responsible for using a blockable Task to submit all the requests.";
     BlockingActionQueue<int> _queue = null!;
     private readonly ConcurrentBag<User> _responses = [];
     private readonly SemaphoreSlim _completed = new SemaphoreSlim(0);
     private int _numberOfRequests;
-
 
     public IReadOnlyList<User> Execute(int numberOfRequests)
     {
@@ -22,8 +22,15 @@ internal class BlockingCollectionStrategy(HttpClient client, string baseUrl, int
         _responses.Clear();
 
         Console.WriteLine($"Submitting {numberOfRequests:N0} requests...");
-        userIds.ForEach(_queue.Submit);
-        Console.WriteLine($"\nCompleted submitting {numberOfRequests:N0} requests.");
+        Task.Run(() =>
+        {
+            // This task is throttled by Submit
+            for (int i = 0; i < userIds.Count; i++)
+            {
+                _queue.Submit(userIds[i]);
+            }
+            Console.WriteLine($"\nCompleted submitting {numberOfRequests:N0} requests.");
+        });
 
         Console.WriteLine("Waiting for responses to complete...");
 

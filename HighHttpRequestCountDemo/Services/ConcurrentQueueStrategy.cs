@@ -39,8 +39,8 @@ internal class ConcurrentQueueStrategy(HttpClient client, string baseUrl, int co
             queue.Submit(userIds[i]);
         }
 
-        Program.WriteLine("Delaying 2 seconds for simulating caller's other busy busy work...", ConsoleColor.White);
-        Thread.Sleep(2000);
+        Program.WriteLine("Delaying 1 second for simulating caller's other busy work...", ConsoleColor.White);
+        Thread.Sleep(1000);
 
         Console.WriteLine($"\nSubmitting Second batch of {SecondBurstCount} requests...");
         for (i = firstBurstCount; i < firstBurstCount + SecondBurstCount; i++)
