@@ -11,7 +11,7 @@ internal class Program
     const string targetSecureBaseUrl = "https://localhost:7560";
     static List<IDemoStrategy> availableStrategies = null!;
 
-    const int NUMBER_OF_REQUESTS_TO_SEND = 1_000;
+    const int NUMBER_OF_REQUESTS_TO_SEND = 10_000;
 
     private static void Main(string[] args)
     {
