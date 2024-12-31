@@ -78,7 +78,7 @@ internal class Program
             }
             catch
             {
-                Thread.Sleep(250);
+                Thread.Sleep(500);
             }
         }
 
